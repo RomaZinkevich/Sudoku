@@ -13,6 +13,16 @@ hearts = pygame.transform.scale(hearts, (90, 90))
 cross = pygame.transform.scale(cross, (150, 150))
 retry = pygame.transform.scale(retry, (150, 150))
 
+num_nums = {1073741913: 1,
+            1073741905: 2,
+            1073741915: 3,
+            1073741904: 4,
+            1073741917: 5,
+            1073741903: 6,
+            1073741919: 7,
+            1073741906: 8,
+            1073741921: 9}
+
 board = brd.Board(9, 9, screen, hearts)
 color = 'black'
 running = True
@@ -23,8 +33,11 @@ while running and board.quit:
         if event.type == pygame.MOUSEBUTTONDOWN:
             board.get_click(event.pos)
         if event.type == pygame.KEYDOWN:
+            print(str(num_nums[event.key]))
             if event.key >= 49 and event.key <= 57:
                 board.click(event.unicode)
+            elif event.key in num_nums:
+                board.click(num_nums[event.key])
     screen.fill((255, 255, 255))
     board.render(color)
     if board.win:

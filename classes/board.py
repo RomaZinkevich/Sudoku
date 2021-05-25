@@ -75,7 +75,7 @@ class Board:
     def mix(self):
         funcs = ['self.transpose()', 'self.swap_line_rows()', 'self.swap_area_rows()',
                  'self.swap_area_colums()', 'self.swap_line_colums()']
-        for i in range(200):
+        for i in range(2000):
             func = random.randrange(0, 5)
             eval(funcs[func])
 
