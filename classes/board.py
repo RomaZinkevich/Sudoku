@@ -3,6 +3,7 @@ import numpy as np
 import random
 import sudoku_solver
 import copy
+import time
 
 BASE_FIELD = np.array(
     [[1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -17,8 +18,10 @@ BASE_FIELD = np.array(
 
 
 class Board:
-    def __init__(self, width, height, screen, hearts):
+    def __init__(self, width, height, screen, hearts, empty_places, mode):
         self.hearts = hearts
+        self.mode = mode
+        self.empty_places = empty_places
         self.screen = screen
         self.width = width
         self.height = height
@@ -34,6 +37,9 @@ class Board:
         self.lifes = 3
         self.win = False
         self.quit = True
+        self.time = 0
+        self.printed_time = '0:00'
+        print(self.field)
 
     def transpose(self):
         self.base_field = self.base_field.transpose()
@@ -102,9 +108,16 @@ class Board:
             pygame.draw.rect(self.screen, 'blue', (int(
                 self.chosen[0]), self.chosen[1], c, c), 15)
         f = pygame.font.Font(None, 100)
-        while not self.stop:
-            self.draw()
-        if self.stop:
+        if not self.stop:
+            for i in range(self.empty_places):
+                quit = self.draw()
+                if quit:
+                    print(self.stop)
+                    break
+            if not quit:
+                self.stop = True
+                self.start_time = time.time()
+        else:
             for i in range(9):
                 for j in range(9):
                     if self.base_field[i][j] == 10:
@@ -113,16 +126,34 @@ class Board:
                         txt = self.base_field[i][j]
                     num = f.render(str(txt), True, color)
                     self.screen.blit(num, (10 + 27 + 90 * j, 10 + 15 + 90 * i))
+        num = f.render(self.mode, True, color)
+        self.screen.blit(num, ((320, 850)))
+        total_time = f.render(self.printed_time, True, color)
+        self.screen.blit(total_time, ((650, 850)))
+        self.time = round(time.time() - self.start_time)
+        self.printed_time = str(self.time // 60) + ":"
+        if self.time % 60 < 10:
+            self.printed_time += "0" + str(self.time % 60)
+        else:
+            self.printed_time += str(self.time % 60)
 
     def draw(self):
+        if self.stop == True:
+            self.base_field = copy.copy(self.field)
+            self.stop = False
+            return True
         row = random.randrange(0, 9)
         column = random.randrange(0, 9)
+        while self.base_field[row][column] == 10:
+            row = random.randrange(0, 9)
+            column = random.randrange(0, 9)
         sudoku = ''
         self.base_field[row][column] = 10
         for i in self.base_field:
             for j in i:
                 sudoku += str(j)
         self.stop = sudoku_solver.solving(sudoku)
+        return False
 
     def get_click(self, mouse_pos):
         if mouse_pos[1] < 820 and mouse_pos[0] > 15 and mouse_pos[0] < 815 and not self.win:
@@ -173,3 +204,4 @@ class Board:
 
     def won(self):
         self.win = True
+        print("--- %s seconds ---" % (time.time() - self.start_time))
